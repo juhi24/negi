@@ -1,2 +1,2 @@
-# negl
-NeGL course project
+# negi
+NeGI course project
