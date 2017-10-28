@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 __metaclass__ = type
 
+import pandas as pd
 from os import path
 from j24 import home
 from sklearn import decomposition
@@ -16,11 +17,15 @@ data = sonde.read(fpath)
 data = sonde.prepare(data)
 times = sonde.launch_times(data)
 
-km = KMeans(init='k-means++', n_clusters=10, n_init=40, n_jobs=-1)
+km = KMeans(init='k-means++', n_clusters=4, n_init=40, n_jobs=-1)
 
 t = sonde.select_var(data, 't')
+tt = sonde.select_var(data, 't', resample=False).ffill()
 
 fig, ax = sonde.heatmap(t, cmap='jet')
 ax.set_ylabel('Height, m')
 ax.set_xlabel('Time')
 ax.set_title('Temperature soundings from 2016')
+
+km.fit(tt.T)
+cen = pd.DataFrame(km.cluster_centers_.T, index=tt.index)

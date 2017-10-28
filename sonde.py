@@ -57,13 +57,14 @@ def between_altitude(data, h_start=50, h_end=11000):
     return out[out['h'] > h_start-1]
 
 
-def select_var(data, var, columns='date'):
+def select_var(data, var, columns='date', resample=True):
     """Select one variable from each sounding."""
     t = data.pivot_table(values=var, columns=columns, index='h')
     t.sort_index(ascending=False, inplace=True)
     if columns=='date':
         t.columns = pd.DatetimeIndex(t.columns)
-        t = t.T.resample('1D').asfreq().T
+        if resample:
+            t = t.T.resample('1D').asfreq().T
     return t
 
 
