@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 __metaclass__ = type
 
 import datetime
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib.dates as mdates
@@ -16,19 +17,6 @@ def launch_times(data):
     """List launch times by sounding id."""
     g = data.groupby('id')
     return g['time'].first().sort_values()
-
-
-def heatmap(t, xlocator=None, datefmt='%b', **kws):
-    """Plot DataFrame with time on x axis as heatmap."""
-    date_formatter = mdates.DateFormatter(datefmt)
-    xloc = xlocator or mdates.MonthLocator()
-    mesh = plt.pcolormesh(t.columns, t.index, t, **kws)
-    ax = mesh.axes
-    fig = ax.get_figure()
-    ax.xaxis.set_major_locator(xloc)
-    ax.xaxis.set_major_formatter(date_formatter)
-    plt.colorbar()
-    return fig, ax
 
 
 def read(file_path, **kws):

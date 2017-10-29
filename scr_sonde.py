@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 __metaclass__ = type
 
 import pandas as pd
+import j24.visualization as vis
 from os import path
 from j24 import home
 from sklearn import decomposition
@@ -22,10 +23,13 @@ km = KMeans(init='k-means++', n_clusters=4, n_init=40, n_jobs=-1)
 t = sonde.select_var(data, 't')
 tt = sonde.select_var(data, 't', resample=False).ffill()
 
-fig, ax = sonde.heatmap(t, cmap='jet')
+fig, ax = vis.heatmap(t, cmap='jet')
+vis.fmt_axis_date(ax.xaxis)
 ax.set_ylabel('Height, m')
 ax.set_xlabel('Time')
 ax.set_title('Temperature soundings from 2016')
 
 km.fit(tt.T)
 cen = pd.DataFrame(km.cluster_centers_.T, index=tt.index)
+cfig, cax = vis.heatmap(cen)
+vis.fmt_axis_str(cax.xaxis, locations=cen.columns.values, fmt='{x:.0f}')
