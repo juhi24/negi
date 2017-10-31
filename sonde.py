@@ -6,11 +6,26 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import matplotlib.dates as mdates
+import matplotlib.ticker as mticker
+import j24.visualization as vis
+from j24 import math
 
 
-plt.ion()
-plt.close('all')
+def heatmap(*args, **kws):
+    """j24.visualization.heatmap wrapper for sounding data"""
+    fig, ax = vis.heatmap(*args, **kws)
+    fmt_m2km(ax.yaxis)
+    ax.set_ylabel('Height, km')
+    return fig, ax
+
+
+def m2km(m, pos):
+    '''formatting m in km'''
+    return '{:.0f}'.format(m*1e-3)
+
+
+def fmt_m2km(axis):
+    axis.set_major_formatter(mticker.FuncFormatter(m2km))
 
 
 def launch_times(data):
@@ -62,7 +77,8 @@ def prepare(data):
     out = between_altitude(out)
     out['date'] = out['time'].apply(lambda tt: tt.date())
     out = between_time(out)
-    return out
+    xy = math.pol2cart_df(out.ws, np.deg2rad(out.wd), cols=('wx', 'wy'))
+    return pd.concat((out, xy), axis=1)
 
 
 
