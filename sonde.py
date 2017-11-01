@@ -8,14 +8,20 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib.ticker as mticker
 import j24.visualization as vis
+from glob import glob
+from os import path
 from j24 import math
 
+DEFAULT_DISCRETE_CMAP = 'Set1_r'
 
-def heatmap(*args, **kws):
+
+def heatmap(*args, classes=None, cmap=DEFAULT_DISCRETE_CMAP, **kws):
     """j24.visualization.heatmap wrapper for sounding data"""
     fig, ax = vis.heatmap(*args, **kws)
     fmt_m2km(ax.yaxis)
     ax.set_ylabel('Height, km')
+    if classes is not None:
+        vis.class_colors(classes, ax=ax, cmap=cmap)
     return fig, ax
 
 
@@ -36,9 +42,31 @@ def launch_times(data):
 
 def read(file_path, **kws):
     """Read tab separated sounding data."""
+    # Size of the comment section varies. Check where it ends.
+    with open(file_path, 'r') as f:
+        for i, line in enumerate(f):
+            if '*/' in line:
+                n_skip = i+2
+                break
     cols = ['time', 'id', 'h', 'lat', 'lon', 'p', 't', 'rh', 'ws', 'wd']
-    return pd.read_csv(file_path, sep='\t', skiprows=24, parse_dates=['time'],
+    return pd.read_csv(file_path, sep='\t', skiprows=n_skip,
+                       parse_dates=['time'],
                        names=cols, **kws)
+
+
+def multiread_prep(file_paths, **kws):
+    dfs = []
+    for fpath in file_paths:
+        data = read(fpath)
+        print(data.time.iloc[0])
+        dfs.append(prepare(data))
+    return pd.concat(dfs).sort_values('time')
+
+
+def read_all_data(datadir):
+    fname_pattern = 'NYA_UAS_????.tab'
+    fpaths = glob(path.join(datadir, fname_pattern))
+    return multiread_prep(fpaths)
 
 
 def between_time(data, hour_start=10, hour_end=12):
@@ -53,11 +81,15 @@ def between_time(data, hour_start=10, hour_end=12):
     return out[out['id'].isin(selected_ids)]
 
 
-def between_altitude(data, h_start=50, h_end=11000):
+def between_altitude(data, h_start=50, h_end=10000):
     """inclusive altitude range"""
     out = data.copy()
     out = out[out['h'] < h_end+1]
     return out[out['h'] > h_start-1]
+
+
+def resample_transpose(df, freq='1D'):
+    return df.T.resample('1D').asfreq().T
 
 
 def select_var(data, var, columns='date', resample=True):
@@ -67,7 +99,7 @@ def select_var(data, var, columns='date', resample=True):
     if columns=='date':
         t.columns = pd.DatetimeIndex(t.columns)
         if resample:
-            t = t.T.resample('1D').asfreq().T
+            t = resample_transpose(t, freq='1D')
     return t
 
 
