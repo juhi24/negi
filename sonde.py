@@ -3,8 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 __metaclass__ = type
 
 import datetime
-import numpy as np
-import matplotlib.pyplot as plt
+#import numpy as np
+#import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib.ticker as mticker
 import j24.visualization as vis
@@ -17,7 +17,10 @@ DEFAULT_DISCRETE_CMAP = 'Set1_r'
 
 def heatmap(*args, classes=None, cmap=DEFAULT_DISCRETE_CMAP, **kws):
     """j24.visualization.heatmap wrapper for sounding data"""
-    fig, ax = vis.heatmap(*args, **kws)
+    # This is needed because of a bug in pandas 0.21
+    from pandas.tseries import converter
+    converter.register()
+    fig, ax = vis.heatmap(*args, cmap='jet', **kws)
     fmt_m2km(ax.yaxis)
     ax.set_ylabel('Height, km')
     if classes is not None:
@@ -55,6 +58,7 @@ def read(file_path, **kws):
 
 
 def multiread_prep(file_paths, **kws):
+    """Read and prepare multiple sounding data files to a single dataset."""
     dfs = []
     for fpath in file_paths:
         data = read(fpath)
@@ -64,6 +68,7 @@ def multiread_prep(file_paths, **kws):
 
 
 def read_all_data(datadir):
+    """Read and prepare all data in datadir to a single dataset."""
     fname_pattern = 'NYA_UAS_????.tab'
     fpaths = glob(path.join(datadir, fname_pattern))
     return multiread_prep(fpaths)
@@ -109,7 +114,7 @@ def prepare(data):
     out = between_altitude(out)
     out['date'] = out['time'].apply(lambda tt: tt.date())
     out = between_time(out)
-    xy = math.pol2cart_df(out.ws, np.deg2rad(out.wd), cols=('wx', 'wy'))
+    xy = math.wind2uv_df(out.ws, out.wd)
     return pd.concat((out, xy), axis=1)
 
 
