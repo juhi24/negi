@@ -65,8 +65,8 @@ def plot_wprofile(prof, ax=None, **kws):
         ax = fig.gca(projection='3d')
     ax.plot(x, y, z, **kws)
     sonde.fmt_m2km(ax.zaxis)
-    ax.set_xlabel('$v$, ms$^{-1}$')
-    ax.set_ylabel('$u$, ms$^{-1}$')
+    ax.set_xlabel('$u$, ms$^{-1}$')
+    ax.set_ylabel('$v$, ms$^{-1}$')
     ax.set_zlabel('Height, km')
     return ax
 
@@ -88,7 +88,7 @@ def scores(data, n_clus=[2,3,4,5,6,7,8,9,10,11],
                 score_func=silhouette_score, ax=None):
     scores = []
     for n in n_clus:
-        km = KMeans(init='k-means++', n_clusters=n, n_init=40, n_jobs=-1)
+        km = KMeans(init='k-means++', n_clusters=n, n_init=10, n_jobs=-1)
         classes = learn.fit_predict(data, km)
         scores.append(score_func(data.T, classes))
     return scores
