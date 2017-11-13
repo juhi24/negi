@@ -19,7 +19,6 @@ def heatmap_t(t, **kws):
     fig, ax = sonde.heatmap(t, cmap='jet', **kws)
     vis.fmt_axis_date(ax.xaxis)
     ax.set_xlabel('Time')
-    ax.set_title('Temperature soundings from 2016')
     return fig, ax
 
 
