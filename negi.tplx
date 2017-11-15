@@ -1,0 +1,14 @@
+((*- extends 'report.tplx' -*))
+
+((* block author *))
+\author{Jussi Tiira}
+((* endblock author *))
+
+((* block title *))
+\title{Climatology in Ny-Ålesund using cluster analysis of atmospheric soundings}
+((* endblock title *))
+
+((* block commands *))
+\setcounter{secnumdepth}{0} % Turns off numbering for sections
+((( super() )))
+((* endblock commands *))

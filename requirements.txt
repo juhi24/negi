@@ -1,0 +1,6 @@
+numpy
+pandas
+matplotlib
+ipython
+scikit-learn
+git+https://github.com/juhi24/j24py
